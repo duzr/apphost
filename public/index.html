@@ -1,0 +1,68 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Node App Host</title>
+  <link rel="stylesheet" href="/styles.css" />
+</head>
+<body>
+  <header>
+    <h1>Node App Host</h1>
+    <button id="add-app-btn" type="button">+ Add app</button>
+  </header>
+
+  <main>
+    <p id="empty-state" hidden>No apps registered yet. Click "Add app" to deploy your first one.</p>
+    <table id="apps-table" hidden>
+      <thead>
+        <tr>
+          <th>Name</th>
+          <th>Status</th>
+          <th>CPU</th>
+          <th>Memory</th>
+          <th>Restarts</th>
+          <th>Commit</th>
+          <th>Actions</th>
+        </tr>
+      </thead>
+      <tbody id="apps-body"></tbody>
+    </table>
+  </main>
+
+  <dialog id="add-app-dialog">
+    <form id="add-app-form">
+      <h2>Add app</h2>
+      <label>
+        Git repo URL
+        <input type="text" name="repoUrl" placeholder="git@github.com:you/your-app.git" required />
+      </label>
+      <label>
+        Branch <span class="hint">(optional, defaults to the repo's default branch)</span>
+        <input type="text" name="branch" placeholder="main" />
+      </label>
+      <p class="hint">
+        The repo must contain an <code>apphost.json</code> at its root and the app must listen on
+        <code>process.env.PORT</code>.
+      </p>
+      <p class="error" id="add-app-error" hidden></p>
+      <div class="dialog-actions">
+        <button type="button" id="add-app-cancel">Cancel</button>
+        <button type="submit">Deploy</button>
+      </div>
+    </form>
+  </dialog>
+
+  <dialog id="logs-dialog">
+    <div class="logs-dialog-inner">
+      <div class="logs-header">
+        <h2 id="logs-title">Logs</h2>
+        <button type="button" id="logs-close">Close</button>
+      </div>
+      <pre id="logs-content"></pre>
+    </div>
+  </dialog>
+
+  <script src="/app.js"></script>
+</body>
+</html>

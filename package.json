@@ -1,0 +1,22 @@
+{
+  "name": "nodeapp-host",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Runs and manages multiple Node.js applications inside a single container, each reachable on its own apps.home subdomain.",
+  "engines": {
+    "node": ">=22"
+  },
+  "main": "server.js",
+  "scripts": {
+    "start": "node server.js"
+  },
+  "dependencies": {
+    "express": "^4.21.2",
+    "http-proxy": "^1.18.1",
+    "pidusage": "^3.0.2",
+    "simple-git": "^3.27.0"
+  },
+  "overrides": {
+    "qs": "^6.16.0"
+  }
+}
