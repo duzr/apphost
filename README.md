@@ -6,9 +6,12 @@ by `server.js`; incoming requests are routed to the right process by Host
 header, so every app gets its own `https://<name>.apps.home` address without
 needing its own Kubernetes Deployment, Service, or Ingress object.
 
-See `deployments/nodeapps/` for the Kubernetes manifests and the main
-repository README for the operator-facing runbook (building the image,
-adding DNS, registering apps).
+This repo is the application source only. It's deployed into a homelab k3s
+cluster managed in a separate repo,
+[`duzr/k3s-homelab`](https://github.com/duzr/k3s-homelab) — see that repo's
+`deployments/nodeapps/` for the Kubernetes manifests and its README for the
+operator-facing runbook (adding DNS, registering apps, the one-time CI
+runner setup).
 
 ## How an app is deployed
 
@@ -42,7 +45,6 @@ adding DNS, registering apps).
 ## Local development
 
 ```bash
-cd apphost
 npm install
 DATA_DIR=./.data SSH_DIR=./.data/ssh MGMT_HOST=localhost npm start
 ```
@@ -51,13 +53,27 @@ Then visit `http://localhost:3000` (Host-based subdomain routing needs real
 DNS or `/etc/hosts` entries to exercise locally — `curl -H "Host: foo.apps.home" http://localhost:3000`
 is the easiest way to test the proxy path without that).
 
-## Building the image
+## Building and deploying
+
+Fully automated by `.github/workflows/build-deploy.yml` — every push to
+`main` builds a `linux/arm64` image, pushes it to
+`ghcr.io/duzr/nodeapp-host` (tagged `latest` and the commit SHA), and rolls
+it out to the cluster's `apphost` Deployment by digest. There's no manual
+build/push step and nothing to edit in the k3s-homelab repo for a normal
+code change.
+
+The deploy step runs on a self-hosted Actions runner living inside the
+cluster (`nodeapps` namespace, RBAC scoped to patching only the `apphost`
+Deployment) — see `duzr/k3s-homelab`'s CLAUDE.md for how that's wired up.
+Because this repo is public, the workflow only triggers on `push` to `main`
+and `workflow_dispatch`, **never** `pull_request` — a fork's PR must never
+be able to run a job on that runner.
+
+To build manually (debugging only):
 
 ```bash
-docker buildx build --platform linux/arm64 -t <your-registry>/nodeapp-host:<tag> --push apphost/
+docker buildx build --platform linux/arm64 -t ghcr.io/duzr/nodeapp-host:<tag> --push .
 ```
-
-Then set that image in `deployments/nodeapps/apphost.yaml` and re-apply.
 
 ## Design notes
 

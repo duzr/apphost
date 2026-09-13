@@ -1,0 +1,61 @@
+name: Build and Deploy
+
+# This repo is PUBLIC and the deploy job below runs on a self-hosted runner
+# living inside the homelab cluster's LAN. Never add a `pull_request` (or
+# `pull_request_target`) trigger here — that would let an untrusted fork's
+# PR execute a job on that runner. Only push-to-main (which only the repo
+# owner can do) and manual dispatch are allowed to trigger this workflow.
+on:
+  push:
+    branches: [main]
+  workflow_dispatch: {}
+
+permissions:
+  contents: read
+  packages: write
+
+jobs:
+  build:
+    runs-on: ubuntu-latest
+    outputs:
+      digest: ${{ steps.push.outputs.digest }}
+    steps:
+      - uses: actions/checkout@v4
+
+      - uses: docker/setup-qemu-action@v3
+        with:
+          platforms: arm64
+
+      - uses: docker/setup-buildx-action@v3
+
+      - uses: docker/login-action@v3
+        with:
+          registry: ghcr.io
+          username: ${{ github.actor }}
+          password: ${{ secrets.GITHUB_TOKEN }}
+
+      - id: push
+        uses: docker/build-push-action@v6
+        with:
+          context: .
+          platforms: linux/arm64
+          push: true
+          tags: |
+            ghcr.io/duzr/nodeapp-host:latest
+            ghcr.io/duzr/nodeapp-host:${{ github.sha }}
+
+  deploy:
+    needs: build
+    # Custom label, not just `self-hosted` -- must match the single runner
+    # registered from deployments/nodeapps/ci-runner.yaml in k3s-homelab.
+    runs-on: [self-hosted, homelab]
+    steps:
+      - name: Set up kubectl
+        uses: azure/setup-kubectl@v4
+
+      - name: Roll out new image
+        run: |
+          kubectl set image deployment/apphost \
+            apphost=ghcr.io/duzr/nodeapp-host@${{ needs.build.outputs.digest }} \
+            -n nodeapps
+          kubectl rollout status deployment/apphost -n nodeapps --timeout=180s
