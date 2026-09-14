@@ -39,7 +39,7 @@ async function main() {
   await apps.restoreOnBoot();
   server.listen(config.MGMT_PORT, () => {
     // eslint-disable-next-line no-console
-    console.log(`nodeapp-host listening on :${config.MGMT_PORT}`);
+    console.log(`apphost listening on :${config.MGMT_PORT}`);
   });
 }
 

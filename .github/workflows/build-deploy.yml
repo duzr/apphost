@@ -41,8 +41,8 @@ jobs:
           platforms: linux/arm64
           push: true
           tags: |
-            ghcr.io/duzr/nodeapp-host:latest
-            ghcr.io/duzr/nodeapp-host:${{ github.sha }}
+            ghcr.io/duzr/apphost:latest
+            ghcr.io/duzr/apphost:${{ github.sha }}
 
   deploy:
     needs: build
@@ -56,6 +56,6 @@ jobs:
       - name: Roll out new image
         run: |
           kubectl set image deployment/apphost \
-            apphost=ghcr.io/duzr/nodeapp-host@${{ needs.build.outputs.digest }} \
+            apphost=ghcr.io/duzr/apphost@${{ needs.build.outputs.digest }} \
             -n nodeapps
           kubectl rollout status deployment/apphost -n nodeapps --timeout=180s

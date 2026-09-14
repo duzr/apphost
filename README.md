@@ -57,7 +57,7 @@ is the easiest way to test the proxy path without that).
 
 Fully automated by `.github/workflows/build-deploy.yml` — every push to
 `main` builds a `linux/arm64` image, pushes it to
-`ghcr.io/duzr/nodeapp-host` (tagged `latest` and the commit SHA), and rolls
+`ghcr.io/duzr/apphost` (tagged `latest` and the commit SHA), and rolls
 it out to the cluster's `apphost` Deployment by digest. There's no manual
 build/push step and nothing to edit in the k3s-homelab repo for a normal
 code change.
@@ -72,7 +72,7 @@ be able to run a job on that runner.
 To build manually (debugging only):
 
 ```bash
-docker buildx build --platform linux/arm64 -t ghcr.io/duzr/nodeapp-host:<tag> --push .
+docker buildx build --platform linux/arm64 -t ghcr.io/duzr/apphost:<tag> --push .
 ```
 
 ## Design notes

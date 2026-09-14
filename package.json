@@ -1,5 +1,5 @@
 {
-  "name": "nodeapp-host",
+  "name": "apphost",
   "version": "1.0.0",
   "private": true,
   "description": "Runs and manages multiple Node.js applications inside a single container, each reachable on its own apps.home subdomain.",
