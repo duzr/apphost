@@ -24,14 +24,21 @@ function gitEnv() {
   };
 }
 
+// simple-git blocks GIT_SSH_COMMAND via .env() unless explicitly unlocked --
+// it guards against an attacker-controlled value swapping in an arbitrary
+// binary for the SSH transport. Safe to enable here: the command comes only
+// from config.SSH_DIR (a deployment-level path to the mounted deploy key),
+// never from user input like the repo URL or app name.
+const GIT_OPTS = { unsafe: { allowUnsafeSshCommand: true } };
+
 async function clone(repoUrl, destDir, branch) {
-  const git = simpleGit().env(gitEnv());
+  const git = simpleGit(GIT_OPTS).env(gitEnv());
   const args = branch ? ['--branch', branch, '--single-branch', '--depth', '1'] : ['--depth', '1'];
   await git.clone(repoUrl, destDir, args);
 }
 
 async function pull(cwd) {
-  const git = simpleGit(cwd).env(gitEnv());
+  const git = simpleGit(cwd, GIT_OPTS).env(gitEnv());
   await git.fetch(['--depth', '1']);
   await git.reset(['--hard', 'FETCH_HEAD']);
   return currentCommit(cwd);
