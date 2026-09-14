@@ -1,4 +1,4 @@
-# Node App Host
+# App Host
 
 Runs and manages multiple Node.js applications inside a single container.
 Each app is its own OS process, supervised (start/stop/restart/crash-restart)
